@@ -1,1151 +1,1197 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Agente de Carreira — Marina Albuquerque</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katai — Gestão de Candidaturas</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --surface-alt: #f0efe9;
-    --border: #e2e0d8;
-    --border-strong: #c8c5bb;
-    --text-primary: #1a1917;
-    --text-secondary: #5c5a54;
-    --text-muted: #9a9890;
-    --accent: #2d5a8e;
-    --accent-bg: #edf3fa;
-    --accent-text: #1e4070;
-    --success: #2e7d52;
-    --success-bg: #edf7f1;
-    --warning: #8a5f00;
-    --warning-bg: #fdf6e3;
-    --danger: #b83232;
-    --danger-bg: #fdf0f0;
-    --radius: 8px;
-    --font: 'Inter', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --border2: #333333;
+    --text: #e8e8e8;
+    --text2: #888888;
+    --text3: #555555;
+    --green: #22c55e;
+    --green-dim: #14532d;
+    --yellow: #eab308;
+    --yellow-dim: #422006;
+    --red: #ef4444;
+    --red-dim: #450a0a;
+    --blue: #3b82f6;
+    --blue-dim: #1e3a5f;
+    --accent: #6366f1;
+    --accent-dim: #1e1b4b;
+    --mono: 'JetBrains Mono', monospace;
   }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: var(--font);
+    font-family: 'Inter', sans-serif;
     background: var(--bg);
-    color: var(--text-primary);
+    color: var(--text);
     min-height: 100vh;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.5;
   }
 
-  /* Layout */
-  .shell { display: flex; min-height: 100vh; }
-
-  .sidebar {
-    width: 220px;
-    flex-shrink: 0;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
+  /* HEADER */
+  header {
     display: flex;
-    flex-direction: column;
-    padding: 1.5rem 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
     position: sticky;
     top: 0;
-    height: 100vh;
+    z-index: 100;
   }
 
   .logo {
-    padding: 0 1.25rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 1rem;
+    background: var(--surface);
+    padding: 0 24px;
+    gap: 2px;
   }
 
-  .logo-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-  .logo-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 1.25rem;
-    font-size: 13px;
-    color: var(--text-secondary);
+  .tab {
+    padding: 10px 16px;
     cursor: pointer;
-    border-radius: 0;
-    transition: background 0.1s, color 0.1s;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s;
+    white-space: nowrap;
   }
 
-  .nav-item:hover { background: var(--surface-alt); color: var(--text-primary); }
-  .nav-item.active { background: var(--accent-bg); color: var(--accent-text); font-weight: 500; }
-  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-  .nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-muted); padding: 1rem 1.25rem 0.4rem; text-transform: uppercase; }
-
-  .conn-indicator {
-    margin: auto 1.25rem 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--text-muted);
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; }
-  .dot.ok { background: var(--success); }
-  .dot.err { background: var(--danger); }
-
-  .main { flex: 1; padding: 2rem 2.5rem; max-width: 860px; }
+  /* MAIN */
+  main { padding: 24px; max-width: 1100px; margin: 0 auto; }
 
   .panel { display: none; }
   .panel.active { display: block; }
 
-  .page-title { font-size: 18px; font-weight: 600; margin-bottom: 0.35rem; }
-  .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.75rem; }
-
-  /* Form elements */
-  textarea, input[type=text], input[type=number], select {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 9px 12px;
+  /* BUTTONS */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
     font-size: 13px;
-    font-family: var(--font);
-    color: var(--text-primary);
-    background: var(--surface);
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text2); }
+  .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid #7f1d1d; }
+  .btn-green { background: var(--green-dim); color: var(--green); border: 1px solid #14532d; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* INPUTS */
+  textarea, input, select {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    width: 100%;
     transition: border-color 0.15s;
-    appearance: none;
+    outline: none;
   }
 
   textarea:focus, input:focus, select:focus {
-    outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(45,90,142,0.08);
   }
 
-  textarea { resize: vertical; min-height: 180px; font-size: 13px; line-height: 1.6; }
+  textarea { resize: vertical; min-height: 120px; }
+  select option { background: var(--surface2); }
 
-  .field { margin-bottom: 1rem; }
-  .field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+  label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 16px; }
 
-  /* Buttons */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-family: var(--font);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    border: 1px solid transparent;
-  }
-
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #1e4070; }
-  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-
-  .btn-ghost { background: var(--surface); color: var(--text-secondary); border-color: var(--border); }
-  .btn-ghost:hover { background: var(--surface-alt); color: var(--text-primary); }
-
-  .btn-danger { background: var(--danger-bg); color: var(--danger); border-color: #f5c0c0; }
-  .btn-danger:hover { background: #fde0e0; }
-
-  .action-bar { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
-
-  /* Cards */
+  /* CARDS */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
   }
 
-  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 0.75rem; }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
 
-  /* Result card */
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); }
+  .badge-gray { background: var(--surface2); color: var(--text2); }
+  .badge-accent { background: var(--accent-dim); color: #a5b4fc; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* RESULT BLOCK */
+  .result-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 20px;
+  }
+
   .result-header {
     display: flex;
+    justify-content: space-between;
     align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .score-ring {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+  .result-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .result-sub { font-size: 13px; color: var(--text2); }
+
+  .adherence-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin: 12px 0 6px;
+    overflow: hidden;
+  }
+  .adherence-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 20px 0 10px;
+  }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .tag-gap { background: var(--red-dim); color: var(--red); border-color: #7f1d1d; }
+  .tag-match { background: var(--green-dim); color: var(--green); border-color: #14532d; }
+
+  .decision-box {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .decision-box.apply { background: var(--green-dim); border: 1px solid #14532d; }
+  .decision-box.adjust { background: var(--yellow-dim); border: 1px solid #713f12; }
+  .decision-box.skip { background: var(--red-dim); border: 1px solid #7f1d1d; }
+  .decision-icon { font-size: 24px; }
+  .decision-text { font-size: 14px; font-weight: 500; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* STATS */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; font-family: var(--mono); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text2); }
+
+  /* CONFIG MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    flex-shrink: 0;
   }
+  .modal-overlay.hidden { display: none; }
 
-  .score-green { background: var(--success-bg); color: var(--success); border: 2px solid #a3d9be; }
-  .score-yellow { background: var(--warning-bg); color: var(--warning); border: 2px solid #f0d080; }
-  .score-red { background: var(--danger-bg); color: var(--danger); border: 2px solid #f5c0c0; }
-
-  .result-meta { flex: 1; }
-  .result-cargo { font-size: 16px; font-weight: 600; }
-  .result-empresa { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-  .result-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-
-  .tag {
-    font-size: 11px;
-    padding: 3px 9px;
-    border-radius: 99px;
-    font-weight: 500;
-  }
-
-  .tag-green { background: var(--success-bg); color: var(--success); }
-  .tag-yellow { background: var(--warning-bg); color: var(--warning); }
-  .tag-red { background: var(--danger-bg); color: var(--danger); }
-  .tag-blue { background: var(--accent-bg); color: var(--accent-text); }
-  .tag-gray { background: var(--surface-alt); color: var(--text-secondary); }
-
-  .section-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 1rem 0 6px;
-  }
-
-  .result-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; }
-
-  /* Metrics */
-  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
-  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
-  .metric-val { font-size: 26px; font-weight: 700; color: var(--text-primary); }
-  .metric-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-
-  /* Table */
-  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; background: var(--surface-alt); border-bottom: 1px solid var(--border); }
-  td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface-alt); }
-  td.empresa { font-weight: 600; color: var(--text-primary); }
-
-  /* Filter pills */
-  .filters { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
-  .filter-pill {
-    font-size: 12px;
-    padding: 5px 14px;
-    border-radius: 99px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.1s;
-  }
-  .filter-pill:hover { background: var(--surface-alt); }
-  .filter-pill.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
-
-  /* CV Viewer */
-  .cv-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
-  .cv-tab {
-    padding: 8px 18px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--text-muted);
-    border: none;
-    background: none;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: color 0.1s;
-    font-family: var(--font);
-  }
-  .cv-tab.active { color: var(--text-primary); border-bottom-color: var(--text-primary); font-weight: 500; }
-  .cv-tab:hover:not(.active) { color: var(--text-secondary); }
-
-  .cv-content {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.8;
-    white-space: pre-wrap;
-    max-height: 560px;
-    overflow-y: auto;
-    font-family: var(--font-mono);
-  }
-
-  /* Modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-  .modal-overlay.open { display: flex; }
   .modal {
     background: var(--surface);
+    border: 1px solid var(--border2);
     border-radius: 12px;
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 460px;
-    border: 1px solid var(--border);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    padding: 28px;
+    width: 480px;
+    max-width: 95vw;
   }
-  .modal-title { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
 
-  /* Config */
-  .config-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.25rem; }
-  .config-card-title { font-size: 13px; font-weight: 600; margin-bottom: 1rem; }
-  .config-msg { font-size: 12px; margin-top: 10px; }
-  .config-msg.ok { color: var(--success); }
-  .config-msg.err { color: var(--danger); }
-
-  /* Loading */
+  /* LOADING */
   .loading {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: var(--text-muted);
+    color: var(--text2);
     font-size: 13px;
-    padding: 1.5rem 0;
+    padding: 20px 0;
   }
-
   .spinner {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--border);
+    width: 16px; height: 16px;
+    border: 2px solid var(--border2);
     border-top-color: var(--accent);
     border-radius: 50%;
-    animation: spin 0.75s linear infinite;
-    flex-shrink: 0;
+    animation: spin 0.6s linear infinite;
   }
-
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .empty {
+  .hidden { display: none !important; }
+
+  /* EMPTY STATE */
+  .empty-state {
     text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-muted);
+    padding: 60px 20px;
+    color: var(--text3);
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filters select, .filters input { width: auto; }
+
+  /* CV EDITOR */
+  .cv-tab-bar { display: flex; gap: 4px; margin-bottom: 20px; }
+  .cv-tab {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
     font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: all 0.15s;
   }
+  .cv-tab.active { background: var(--accent-dim); color: #a5b4fc; border-color: var(--accent); }
 
-  .empty svg { margin: 0 auto 0.75rem; display: block; opacity: 0.3; }
-
-  /* Mercado insights */
-  .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
-  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
-  .insight-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px; }
-  .insight-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-
-  /* Responsive */
-  @media (max-width: 720px) {
-    .sidebar { display: none; }
-    .main { padding: 1rem; }
-    .metric-grid { grid-template-columns: 1fr 1fr; }
-    .row, .row-3 { grid-template-columns: 1fr; }
-    .insight-grid { grid-template-columns: 1fr; }
+  .history-item {
+    padding: 12px;
+    border-left: 3px solid var(--border2);
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--text2);
   }
+  .history-item strong { color: var(--text); display: block; margin-bottom: 4px; }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+  /* MERCADO */
+  .mercado-skill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mercado-skill:last-child { border-bottom: none; }
+  .skill-bar-wrap { flex: 1; margin: 0 16px; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .skill-bar { height: 100%; background: var(--accent); border-radius: 2px; }
+  .skill-count { font-family: var(--mono); font-size: 12px; color: var(--text2); min-width: 24px; text-align: right; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13px;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: opacity 0.3s;
+  }
+  .toast.hidden { display: none; }
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error { border-left: 3px solid var(--red); }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+    .tabs { padding: 0 16px; overflow-x: auto; }
+  }
 </style>
 </head>
 <body>
 
-<div class="shell">
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <div class="logo">
-      <div class="logo-name">Agente de Carreira</div>
-      <div class="logo-sub">Marina Albuquerque</div>
-    </div>
-
-    <div class="nav-section">Principal</div>
-    <button class="nav-item active" onclick="switchTab('vaga', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      Analisar vaga
-    </button>
-    <button class="nav-item" onclick="switchTab('painel', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Painel
-    </button>
-    <button class="nav-item" onclick="switchTab('mercado', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
-      Mercado
-    </button>
-
-    <div class="nav-section">Perfis</div>
-    <button class="nav-item" onclick="switchTab('cv', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Ver CVs
-    </button>
-
-    <div class="nav-section">Sistema</div>
-    <button class="nav-item" onclick="switchTab('config', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Configuração
-    </button>
-
-    <div class="conn-indicator">
-      <div class="dot" id="sidebar-dot"></div>
-      <span id="sidebar-conn">Não configurado</span>
-    </div>
-  </nav>
-
-  <!-- Main -->
-  <main class="main">
-
-    <!-- Analisar Vaga -->
-    <div id="tab-vaga" class="panel active">
-      <div class="page-title">Analisar vaga</div>
-      <div class="page-sub">Cole o texto da vaga. O agente calcula aderência, aponta gaps reais e sugere ajustes de ATS.</div>
-
-      <div class="row" style="margin-bottom: 12px;">
-        <div class="field" style="margin-bottom:0">
-          <label>Plataforma</label>
-          <select id="plataforma">
-            <option value="">Selecione</option>
-            <option>LinkedIn</option>
-            <option>Gupy</option>
-            <option>Indeed</option>
-          </select>
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label>Perfil de CV</label>
-          <select id="cv-perfil">
-            <option value="Automático">Automático (agente decide)</option>
-            <option>Produto</option>
-            <option>Scrum Master</option>
-            <option>Requisitos</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Texto da vaga</label>
-        <textarea id="vaga-texto" placeholder="Cole aqui o texto completo da vaga, incluindo requisitos, responsabilidades e qualquer informação de salário ou benefícios..."></textarea>
-      </div>
-
-      <div class="action-bar">
-        <button class="btn btn-primary" onclick="analisarVaga()" id="btn-analisar">Analisar vaga</button>
-        <button class="btn btn-ghost" onclick="limparVaga()">Limpar</button>
-      </div>
-
-      <div id="analise-result" style="margin-top: 1.5rem;"></div>
-    </div>
-
-    <!-- Painel -->
-    <div id="tab-painel" class="panel">
-      <div class="page-title">Painel de candidaturas</div>
-      <div class="page-sub">Acompanhe o status de todas as vagas.</div>
-      <div class="metric-grid" id="metrics">
-        <div class="metric"><div class="metric-val">—</div><div class="metric-label">Total</div></div>
-        <div class="metric"><div class="metric-val">—</div><div class="metric-label">Candidatadas</div></div>
-        <div class="metric"><div class="metric-val">—</div><div class="metric-label">Em processo</div></div>
-        <div class="metric"><div class="metric-val">—</div><div class="metric-label">Aderência média</div></div>
-      </div>
-      <div class="filters">
-        <button class="filter-pill active" onclick="filtrarPainel('todos', this)">Todos</button>
-        <button class="filter-pill" onclick="filtrarPainel('candidatada', this)">Candidatada</button>
-        <button class="filter-pill" onclick="filtrarPainel('em processo', this)">Em processo</button>
-        <button class="filter-pill" onclick="filtrarPainel('descartada', this)">Descartada</button>
-        <button class="filter-pill" onclick="filtrarPainel('recusada', this)">Recusada</button>
-      </div>
-      <div id="painel-table"></div>
-    </div>
-
-    <!-- Mercado -->
-    <div id="tab-mercado" class="panel">
-      <div class="page-title">Visão de mercado</div>
-      <div class="page-sub">Padrões extraídos das vagas analisadas.</div>
-      <div id="mercado-content"><div class="empty">Analise vagas primeiro para ver padrões de mercado.</div></div>
-    </div>
-
-    <!-- CVs -->
-    <div id="tab-cv" class="panel">
-      <div class="page-title">Perfis de CV</div>
-      <div class="page-sub">Três versões do currículo para contextos diferentes.</div>
-      <div class="cv-tabs">
-        <button class="cv-tab active" onclick="showCV('produto', this)">Produto</button>
-        <button class="cv-tab" onclick="showCV('sm', this)">Scrum Master</button>
-        <button class="cv-tab" onclick="showCV('requisitos', this)">Requisitos</button>
-      </div>
-      <div class="cv-content" id="cv-display"></div>
-    </div>
-
-    <!-- Config -->
-    <div id="tab-config" class="panel">
-      <div class="page-title">Configuração</div>
-      <div class="page-sub">Credenciais do Supabase. Salvas localmente no navegador.</div>
-
-      <div class="config-card">
-        <div class="config-card-title">Conexão Supabase</div>
-        <div class="field">
-          <label>URL do projeto</label>
-          <input type="text" id="sb-url" placeholder="https://xxxx.supabase.co" />
-        </div>
-        <div class="field">
-          <label>Anon key</label>
-          <input type="text" id="sb-key" placeholder="eyJ..." />
-        </div>
-        <button class="btn btn-primary" onclick="salvarConfig()">Salvar e testar conexão</button>
-        <div id="config-msg" class="config-msg"></div>
-      </div>
-
-      <div class="config-card">
-        <div class="config-card-title">API Anthropic</div>
-        <div class="field">
-          <label>Chave de API</label>
-          <input type="text" id="ant-key" placeholder="sk-ant-..." />
-        </div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Necessária para análise de vagas. Salva apenas no navegador.</div>
-        <button class="btn btn-ghost" style="margin-top: 10px;" onclick="salvarAntKey()">Salvar chave</button>
-        <div id="ant-msg" class="config-msg"></div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<!-- Modal salvar candidatura -->
-<div class="modal-overlay" id="modal-salvar">
+<!-- CONFIG MODAL -->
+<div class="modal-overlay" id="configModal">
   <div class="modal">
-    <div class="modal-title">Salvar candidatura</div>
-    <div class="row">
-      <div class="field">
-        <label>Empresa</label>
-        <input type="text" id="m-empresa" />
-      </div>
-      <div class="field">
-        <label>Cargo</label>
-        <input type="text" id="m-cargo" />
-      </div>
+    <div class="modal-title">Configurar conexão</div>
+    <div class="modal-sub">Suas credenciais ficam salvas localmente no navegador.</div>
+    <div class="field">
+      <label>URL do Supabase</label>
+      <input type="text" id="cfgUrl" placeholder="https://xxxx.supabase.co">
     </div>
     <div class="field">
-      <label>Link da vaga</label>
-      <input type="text" id="m-link" placeholder="https://..." />
+      <label>Anon Key</label>
+      <input type="password" id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
     </div>
-    <div class="row">
-      <div class="field">
-        <label>Salário pretendido (R$)</label>
-        <input type="number" id="m-salario" value="16000" />
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <select id="m-status" onchange="toggleMotivo()">
-          <option>candidatada</option>
-          <option>em processo</option>
-          <option>descartada</option>
-        </select>
-      </div>
+    <div style="display:flex; gap:10px; margin-top:8px;">
+      <button class="btn btn-primary" onclick="saveConfig()">Salvar e conectar</button>
+      <button class="btn btn-ghost" onclick="testConnection()">Testar conexão</button>
     </div>
-    <div class="field" id="m-motivo-wrap" style="display:none">
-      <label>Motivo do descarte</label>
-      <input type="text" id="m-motivo" placeholder="Ex: salário abaixo do piso, senioridade inadequada..." />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCandidatura()">Salvar</button>
-    </div>
+    <div id="configStatus" style="margin-top:12px; font-size:13px; color:var(--text2);"></div>
   </div>
 </div>
 
-<!-- Modal atualizar status -->
-<div class="modal-overlay" id="modal-status">
-  <div class="modal">
-    <div class="modal-title">Atualizar candidatura</div>
-    <input type="hidden" id="edit-id" />
-    <div class="field">
-      <label>Novo status</label>
-      <select id="edit-status" onchange="toggleEditMotivo()">
-        <option>candidatada</option>
-        <option>em processo</option>
-        <option>recusada</option>
-        <option>descartada</option>
+<!-- TOAST -->
+<div class="toast hidden" id="toast"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">kata<span>i</span></div>
+  <div class="header-actions">
+    <span id="connStatus" style="font-size:12px; color:var(--text3);">⚪ não conectado</span>
+    <button class="btn btn-ghost btn-sm" onclick="openConfig()">⚙ Config</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <div class="tab active" onclick="switchTab('analisar')">Analisar Vaga</div>
+  <div class="tab" onclick="switchTab('cvs')">Gerenciar CVs</div>
+  <div class="tab" onclick="switchTab('painel')">Painel de Vagas</div>
+  <div class="tab" onclick="switchTab('mercado')">Mercado</div>
+</nav>
+
+<main>
+
+  <!-- ABA 1: ANALISAR VAGA -->
+  <div class="panel active" id="panel-analisar">
+    <div class="grid-2" style="gap:24px; align-items:start;">
+      <div>
+        <div class="card">
+          <div class="card-title">Texto da vaga</div>
+          <div class="field">
+            <textarea id="vagaTexto" rows="14" placeholder="Cole aqui o texto completo da vaga..."></textarea>
+          </div>
+          <div class="field">
+            <label>Plataforma</label>
+            <select id="vagaPlataforma">
+              <option>Gupy</option>
+              <option>LinkedIn</option>
+              <option>Indeed</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Link da vaga (opcional)</label>
+            <input type="url" id="vagaLink" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label>Data de publicação</label>
+            <input type="date" id="vagaData">
+          </div>
+          <button class="btn btn-primary" style="width:100%;" onclick="analisarVaga()">Analisar vaga</button>
+        </div>
+      </div>
+
+      <div id="resultArea">
+        <div class="empty-state">
+          <div class="icon">🎯</div>
+          <p>Cole o texto de uma vaga e clique em Analisar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 2: GERENCIAR CVs -->
+  <div class="panel" id="panel-cvs">
+    <div class="cv-tab-bar">
+      <div class="cv-tab active" onclick="switchCV('produto')">Produto</div>
+      <div class="cv-tab" onclick="switchCV('sm')">Scrum Master</div>
+      <div class="cv-tab" onclick="switchCV('req')">Requisitos</div>
+    </div>
+
+    <div class="grid-2" style="gap:24px; align-items:start;">
+      <div>
+        <div class="card">
+          <div class="card-title" id="cvCardTitle">CV — Produto</div>
+          <div class="field">
+            <label>Variações de cargo-alvo</label>
+            <input type="text" id="cvCargos" placeholder="GPM, Senior PM, Lead PM, Head of Product">
+          </div>
+          <div class="field">
+            <label>Resumo / Headline</label>
+            <textarea id="cvResumo" rows="4" placeholder="Profissional com X anos..."></textarea>
+          </div>
+          <div class="field">
+            <label>Palavras-chave ATS (separadas por vírgula)</label>
+            <input type="text" id="cvKeywords" placeholder="OKR, roadmap, stakeholders, discovery...">
+          </div>
+          <div class="field">
+            <label>Diferencial deste perfil</label>
+            <textarea id="cvDiferencial" rows="3" placeholder="O que este CV destaca que os outros não..."></textarea>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="saveCV()">Salvar CV</button>
+            <button class="btn btn-ghost" onclick="exportCV()">Exportar .txt</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">Histórico de alterações</div>
+          <div id="cvHistorico">
+            <div class="empty-state" style="padding:30px 0;">
+              <p>Nenhuma alteração registrada</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA 3: PAINEL DE VAGAS -->
+  <div class="panel" id="panel-painel">
+    <div class="grid-3" style="margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-label">Total de vagas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--green);" id="statEmProcesso">—</div>
+        <div class="stat-label">Em processo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent);" id="statMediaAdh">—</div>
+        <div class="stat-label">Aderência média</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <select id="filterStatus" onchange="renderPainel()" style="width:160px;">
+        <option value="">Todos os status</option>
+        <option>Candidatada</option>
+        <option>Em processo</option>
+        <option>Descartada</option>
+        <option>Recusada</option>
+        <option>Oferta</option>
       </select>
+      <select id="filterAdh" onchange="renderPainel()" style="width:150px;">
+        <option value="">Toda aderência</option>
+        <option value="verde">Verde (≥70%)</option>
+        <option value="amarelo">Amarelo (40–69%)</option>
+        <option value="vermelho">Vermelho (&lt;40%)</option>
+      </select>
+      <input type="text" id="filterBusca" placeholder="Buscar empresa ou cargo..." style="width:220px;" oninput="renderPainel()">
+      <button class="btn btn-ghost btn-sm" onclick="loadVagas()">↺ Atualizar</button>
     </div>
-    <div class="field" id="edit-motivo-wrap" style="display:none">
-      <label>Motivo</label>
-      <input type="text" id="edit-motivo" />
-    </div>
-    <div class="field">
-      <label>Anotações</label>
-      <textarea id="edit-notas" style="min-height: 80px;" placeholder="Feedback, próximas etapas, contatos..."></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="fecharModalStatus()">Cancelar</button>
-      <button class="btn btn-primary" onclick="atualizarStatus()">Salvar</button>
+
+    <div class="card" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Cargo</th>
+              <th>Plataforma</th>
+              <th>Aderência</th>
+              <th>Status</th>
+              <th>CV</th>
+              <th>Data</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="vagasTableBody">
+            <tr><td colspan="8" style="text-align:center; color:var(--text3); padding:40px;">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- ABA 4: MERCADO -->
+  <div class="panel" id="panel-mercado">
+    <div class="grid-2" style="gap:24px; margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="stat-value" id="mercadoTotal">—</div>
+        <div class="stat-label">Vagas analisadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mercadoAdh">—</div>
+        <div class="stat-label">Aderência média geral</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:24px;">
+      <div class="card">
+        <div class="card-title">Skills mais pedidas</div>
+        <div id="mercadoSkills">
+          <div class="empty-state" style="padding:30px 0;"><p>Analise vagas para gerar insights</p></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Gaps recorrentes no seu perfil</div>
+        <div id="mercadoGaps">
+          <div class="empty-state" style="padding:30px 0;"><p>Analise vagas para gerar insights</p></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Salários mencionados</div>
+        <div id="mercadoSalarios">
+          <div class="empty-state" style="padding:30px 0;"><p>Nenhum salário capturado ainda</p></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Distribuição por plataforma</div>
+        <div id="mercadoPlataformas">
+          <div class="empty-state" style="padding:30px 0;"><p>Analise vagas para gerar insights</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
 
 <script>
-const PERFIL = {
-  produto: `GROUP PRODUCT MANAGER | PRODUCT MANAGER SÊNIOR
-Marina Albuquerque
+// ============================================================
+// CONFIG & SUPABASE
+// ============================================================
+const PERFIL = `
+Marina Albuquerque — Senior GPM / Product Manager
+Experiência: 17+ anos em produtos digitais, setores regulados (energia, telecom, SaaS enterprise)
+Formação: Ciência da Computação + MBA Marketing/Growth + PSM I, CSPO, MIT xPRO
+Cargos-alvo: GPM, Senior PM, Lead PM, Senior PO, Scrum Master, Analista de Requisitos Sênior
+Regime: CLT remoto | Piso: R$16k
+Competências-chave: Product Discovery, OKR, roadmap, stakeholders, agile, BI (Power BI, Tableau), dados, B2B SaaS
+CVs disponíveis: Produto, Scrum Master (SM), Requisitos
+`;
 
-RESUMO
-Product Manager com mais de 15 anos de experiência em produtos digitais B2C e B2B Enterprise, com forte atuação em discovery, priorização de backlog, roadmap e entrega de valor. Formação em Ciência da Computação (UFF) com MBA em Marketing, Branding & Growth (PUCRS). Certificação PSM I e CSPO, com prática consolidada em Scrum, Kanban e SAFe. Histórico comprovado de impacto em retenção, NRR e engajamento — liderando times cross-funcionais em Grupo Boticário, Vibra Energia e Sonda Brasil.
+let SB_URL = localStorage.getItem('sb_url') || '';
+let SB_KEY = localStorage.getItem('sb_key') || '';
 
-EXPERIÊNCIAS
-
-Product Manager Specialist — Spassu / ANATEL (jul/2024–mai/2026, remoto)
-• Liderou gestão de performance com OKRs e priorização estratégica de backlog digital voltado à população, em conformidade com regulamentações da ANATEL
-• Aplicou metodologias de discovery para definição de estratégias de produtos digitais
-• Estruturou fluxos de trabalho e cerimônias ágeis para times distribuídos
-
-Lead Product Manager — Grupo Boticário (jul/2022–jun/2023, remoto)
-• Escalou produto SaaS B2C do segmento mid-market para Enterprise via integrações Backstage críticas
-• Elevou rendimento de equipe de 20% para 89% com abordagem data-driven
-• Impulsionou métricas de retenção e NRR via analytics e BI
-• Gerenciou times cross-funcionais com Scrum e Kanban
-
-Group Product Manager — Vibra Energia (nov/2020–jun/2022, híbrido RJ)
-• Estratégia e Design de Serviços B2B Enterprise para Grandes Consumidores
-• Migrou 5% do fluxo de vendas para app em 6 meses (SAP, Salesforce, Oracle)
-• Roadmap com storytelling para stakeholders executivos
-• Upsell/cross-sell com impacto direto no NRR do portfólio
-
-Product Manager Sênior — Sonda Brasil (mai/2017–nov/2020, RJ)
-• Design de Serviços e implantação de solução mobile (Frontstage) para Aviação, TRR e lubrificantes marítimos
-• Elevou engajamento do cliente em +200%
-• Formou e liderou Squad de Negócios cross-funcional
-
-COMPETÊNCIAS
-Discovery · Roadmap · OKRs · KPIs · Scrum · Kanban · SAFe · Design de Serviços · UX · Analytics · BI · NRR · Retenção · Upsell · Cross-sell · B2B Enterprise · B2C · SaaS · Stakeholder Management · Storytelling executivo · SAP · Salesforce · Oracle · JIRA`,
-
-  sm: `SCRUM MASTER | FACILITADORA ÁGIL | GOVERNANÇA DE SQUADS
-Marina Albuquerque
-
-RESUMO
-Scrum Master certificada (PSM I) com mais de 15 anos de atuação em ambientes ágeis, combinando facilitação de cerimônias, governança de squads e acompanhamento de métricas de fluxo. Experiência prática com Lead Time, Throughput, WIP e controle de bugs em times de desenvolvimento. Formação em Ciência da Computação com visão de negócio que facilita mediação entre áreas técnicas, de produto e operação. Domínio de JIRA, Redmine e Confluence.
-
-EXPERIÊNCIAS
-
-Scrum Master / PM Specialist — Spassu / ANATEL (jul/2024–mai/2026, remoto)
-• Facilitação de cerimônias completas: Daily, Planning, Review, Retrospective e Refinamento em times distribuídos
-• Controle de WIP por sprint (backend e frontend) para garantir previsibilidade de entrega
-• Monitoramento de Lead Time desde solicitação até conclusão ou descarte
-• Acompanhamento de Throughput por sprint como indicador de eficiência
-• Gestão de SLA de produção com reserva de 4h/sprint
-• Identificação e remoção de impedimentos; quebra de histórias quando necessário
-• Redmine como ferramenta de gestão em contexto governamental
-
-Lead PM / Facilitadora — Grupo Boticário (jul/2022–jun/2023, remoto)
-• Cerimônias ágeis com times cross-funcionais (Scrum + Kanban)
-• Elevou rendimento de equipe de 20% para 89%
-• Apoio a POs na organização e priorização de demandas
-
-Group PM / Coordenação Ágil — Vibra Energia (nov/2020–jun/2022, híbrido)
-• Times multidisciplinares em ambiente ágil; monitoramento de riscos e impedimentos
-• PI Planning e rituais de governança SAFe
-
-Product Manager Sênior — Sonda Brasil (mai/2017–nov/2020, RJ)
-• Squad de Negócios cross-funcional; boas práticas ágeis; +200% resultados
-
-COMPETÊNCIAS
-Scrum · Kanban · SAFe · PI Planning · Facilitação de cerimônias · Lead Time · Throughput · WIP · Aging · Bugs & SLA · JIRA · Confluence · Redmine · Impedimentos · Melhoria contínua · Governança ágil · OKR · Data-driven`,
-
-  requisitos: `ANALISTA DE NEGÓCIOS | ANALISTA DE REQUISITOS ESPECIALISTA
-Marina Albuquerque
-
-RESUMO
-Analista de Negócios com mais de 15 anos de experiência em levantamento e definição de requisitos funcionais e não funcionais, modelagem de processos e gestão de projetos digitais. Formação em Ciência da Computação (UFF). Certificações PSM I e CSPO. Atuação em projetos de impacto no setor público e regulatório — ANATEL e Petrobras — com foco em facilitação entre áreas de negócio e equipes técnicas.
-
-EXPERIÊNCIAS
-
-Analista de Requisitos Especialista — Spassu / ANATEL (jul/2024–mai/2026, remoto)
-• Requisitos funcionais e não funcionais (UX e performance) via histórias de usuário DoR/DoD no Redmine
-• Modelagem BPMN (Bizagi, Visio) e UML (atividade, classes, sequência)
-• OKRs táticos para priorização de backlog em conformidade com ANATEL
-• Facilitação entre negócio e equipe técnica; alinhamento com stakeholders
-
-Analista de Requisitos Especialista — Grupo Boticário (jul/2022–jun/2023, remoto)
-• Requisitos SaaS B2C; histórias de usuário DoR/DoD; análise de mercado
-• Árvores de oportunidade, matriz CSD, service blueprint, design system
-• Elevou rendimento de equipe de 20% para 89%
-
-Analista de Requisitos Especialista — Vibra Energia (nov/2020–jun/2022, híbrido)
-• Casos de uso UML; cenários de teste; protótipos Figma e Sketch
-• SQL para critérios de aceite; GitLab e Azure para rastreabilidade
-• Integração SAP, Salesforce, Oracle; migrou 5% fluxo de vendas para app em 6 meses
-
-Product Manager Sênior — Sonda Brasil (mai/2017–nov/2020, RJ)
-• Ciclo formal: casos de uso assinados, modelo de visão, manuais, homologação incremental/espiral
-• UML (classe, sequência, atividade) + BPMN; documentação completa
-
-COMPETÊNCIAS
-Requisitos funcionais e não funcionais · BPMN · UML · Histórias de usuário DoR/DoD · Figma · Sketch · SQL · GitLab · Azure · Casos de uso · Prototipação · Documentação formal · Redmine · JIRA · Confluence · Bizagi · Visio`
-};
-
-let sbUrl = '', sbKey = '', antKey = '', analiseAtual = null, todasVagas = [], filtroAtivo = 'todos';
-
-function init() {
-  sbUrl = localStorage.getItem('sb_url') || '';
-  sbKey = localStorage.getItem('sb_key') || '';
-  antKey = localStorage.getItem('ant_key') || '';
-  if (sbUrl) document.getElementById('sb-url').value = sbUrl;
-  if (sbKey) document.getElementById('sb-key').value = sbKey;
-  if (antKey) document.getElementById('ant-key').value = antKey;
-  atualizarIndicador();
-  showCV('produto', null);
+function saveConfig() {
+  SB_URL = document.getElementById('cfgUrl').value.trim().replace(/\/$/, '');
+  SB_KEY = document.getElementById('cfgKey').value.trim();
+  if (!SB_URL || !SB_KEY) { document.getElementById('configStatus').textContent = 'Preencha URL e Key.'; return; }
+  localStorage.setItem('sb_url', SB_URL);
+  localStorage.setItem('sb_key', SB_KEY);
+  document.getElementById('configModal').classList.add('hidden');
+  updateConnStatus(true);
+  loadVagas();
+  toast('Configuração salva ✓', 'success');
 }
 
-function atualizarIndicador() {
-  const dot = document.getElementById('sidebar-dot');
-  const txt = document.getElementById('sidebar-conn');
-  if (sbUrl && sbKey) {
-    dot.className = 'dot ok';
-    txt.textContent = 'Supabase ok';
-  } else {
-    dot.className = 'dot err';
-    txt.textContent = 'Não configurado';
-  }
-}
-
-function switchTab(id, el) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  if (el) el.classList.add('active');
-  if (id === 'painel') carregarPainel();
-  if (id === 'mercado') carregarMercado();
-  if (id === 'cv') showCV('produto', null);
-}
-
-function showCV(tipo, el) {
-  if (el) {
-    document.querySelectorAll('.cv-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-  }
-  document.getElementById('cv-display').textContent = PERFIL[tipo];
-}
-
-async function salvarConfig() {
-  const url = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
-  const key = document.getElementById('sb-key').value.trim();
-  const msg = document.getElementById('config-msg');
-  if (!url || !key) { setMsg(msg, 'Preencha URL e key.', false); return; }
-  setMsg(msg, 'Testando...', null);
+async function testConnection() {
+  const url = document.getElementById('cfgUrl').value.trim().replace(/\/$/, '');
+  const key = document.getElementById('cfgKey').value.trim();
+  document.getElementById('configStatus').textContent = 'Testando...';
   try {
-    const r = await fetch(url + '/rest/v1/candidaturas?select=id&limit=1', {
-      headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+    const r = await fetch(`${url}/rest/v1/vagas?limit=1`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` }
     });
-    if (r.ok) {
-      localStorage.setItem('sb_url', url);
-      localStorage.setItem('sb_key', key);
-      sbUrl = url; sbKey = key;
-      setMsg(msg, 'Conexão ok. Configuração salva.', true);
-      atualizarIndicador();
+    if (r.ok || r.status === 406) {
+      document.getElementById('configStatus').innerHTML = '<span style="color:var(--green)">✓ Conexão OK</span>';
     } else {
-      setMsg(msg, 'Erro ' + r.status + '. Verifique as credenciais.', false);
+      document.getElementById('configStatus').innerHTML = `<span style="color:var(--red)">Erro ${r.status}</span>`;
     }
   } catch(e) {
-    setMsg(msg, 'Falha: ' + e.message, false);
+    document.getElementById('configStatus').innerHTML = `<span style="color:var(--red)">Falha: ${e.message}</span>`;
   }
 }
 
-function salvarAntKey() {
-  const key = document.getElementById('ant-key').value.trim();
-  const msg = document.getElementById('ant-msg');
-  if (!key) { setMsg(msg, 'Informe a chave.', false); return; }
-  localStorage.setItem('ant_key', key);
-  antKey = key;
-  setMsg(msg, 'Chave salva.', true);
+function updateConnStatus(ok) {
+  const el = document.getElementById('connStatus');
+  el.textContent = ok ? '🟢 conectado' : '⚪ não conectado';
+  el.style.color = ok ? 'var(--green)' : 'var(--text3)';
 }
 
-function setMsg(el, txt, ok) {
-  el.textContent = txt;
-  el.className = 'config-msg' + (ok === true ? ' ok' : ok === false ? ' err' : '');
+function openConfig() {
+  document.getElementById('cfgUrl').value = SB_URL;
+  document.getElementById('cfgKey').value = SB_KEY;
+  document.getElementById('configModal').classList.remove('hidden');
 }
 
-function limparVaga() {
-  document.getElementById('vaga-texto').value = '';
-  document.getElementById('analise-result').innerHTML = '';
-  analiseAtual = null;
+async function sbFetch(path, opts = {}) {
+  if (!SB_URL || !SB_KEY) { openConfig(); throw new Error('Sem credenciais'); }
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      apikey: SB_KEY,
+      Authorization: `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+      ...(opts.headers || {})
+    }
+  });
+  if (!r.ok) {
+    const err = await r.text();
+    throw new Error(`Supabase ${r.status}: ${err}`);
+  }
+  return r.json();
 }
 
-function toggleMotivo() {
-  const s = document.getElementById('m-status').value;
-  document.getElementById('m-motivo-wrap').style.display = s === 'descartada' ? 'block' : 'none';
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['analisar','cvs','painel','mercado'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if (name === 'painel') { loadVagas(); }
+  if (name === 'mercado') { loadMercado(); }
+  if (name === 'cvs') { loadCV(); }
 }
 
-function toggleEditMotivo() {
-  const s = document.getElementById('edit-status').value;
-  document.getElementById('edit-motivo-wrap').style.display = (s === 'descartada' || s === 'recusada') ? 'block' : 'none';
-}
-
+// ============================================================
+// ANALISAR VAGA
+// ============================================================
 async function analisarVaga() {
-  const texto = document.getElementById('vaga-texto').value.trim();
-  const plataforma = document.getElementById('plataforma').value;
-  if (!texto) { alert('Cole o texto da vaga primeiro.'); return; }
-  if (!antKey) { alert('Configure a chave da API Anthropic na aba Configuração.'); return; }
+  const texto = document.getElementById('vagaTexto').value.trim();
+  if (!texto) { toast('Cole o texto da vaga primeiro', 'error'); return; }
+  const plataforma = document.getElementById('vagaPlataforma').value;
+  const link = document.getElementById('vagaLink').value;
+  const dataVaga = document.getElementById('vagaData').value;
 
-  const btn = document.getElementById('btn-analisar');
-  btn.disabled = true; btn.textContent = 'Analisando...';
-  document.getElementById('analise-result').innerHTML = '<div class="loading"><div class="spinner"></div>Analisando vaga com IA...</div>';
-
-  const prompt = `Você é um agente de carreira direto, honesto e sem condescendência. Analise a vaga abaixo contra o perfil da candidata.
-
-PERFIL COMPLETO — Marina Albuquerque:
-${PERFIL.produto}
-
----
-${PERFIL.sm}
-
----
-${PERFIL.requisitos}
-
-VAGA:
-${texto}
-
-Retorne SOMENTE JSON válido, sem markdown, sem texto fora do JSON:
-{
-  "empresa": "nome da empresa ou Não informado",
-  "cargo": "título exato do cargo",
-  "senioridade": "junior|pleno|senior|especialista|lead|group|head",
-  "aderencia": número inteiro de 0 a 100,
-  "veredicto": "APLICAR|APLICAR COM AJUSTE|NÃO APLICAR",
-  "cv_recomendado": "Produto|Scrum Master|Requisitos",
-  "pontos_fortes": "2-3 pontos específicos onde o perfil atende — sem elogios vazios, só o que é real",
-  "gaps": "gaps reais e honestos. Se não houver gaps relevantes, diga 'Sem gaps críticos para esta vaga'",
-  "ajustes_ats": "palavras-chave específicas desta vaga que devem aparecer no CV para passar por ATS. Seja cirúrgico",
-  "justificativa": "veredicto em 2-3 frases diretas. Sem suavizar. Se não vale a pena, diga por quê",
-  "salario_mencionado": número ou null,
-  "tecnologias_pedidas": ["array", "de", "tecnologias", "mencionadas"]
-}`;
+  const resultArea = document.getElementById('resultArea');
+  resultArea.innerHTML = `<div class="loading"><div class="spinner"></div> Analisando vaga com IA...</div>`;
 
   try {
+    const prompt = `Você é um consultor de carreira sênior especializado em vagas de produto digital, agile e tecnologia no Brasil.
+
+PERFIL DA CANDIDATA:
+${PERFIL}
+
+TEXTO DA VAGA:
+${texto}
+
+Retorne APENAS um JSON válido (sem markdown, sem explicações) com esta estrutura exata:
+{
+  "empresa": "nome da empresa",
+  "cargo": "título do cargo",
+  "nivel": "Sênior|Pleno|Júnior|Lead|Staff|GPM",
+  "aderencia": 75,
+  "veredicto": "verde|amarelo|vermelho",
+  "decisao": "aplicar|ajustar|descartar",
+  "cv_recomendado": "Produto|SM|Requisitos",
+  "matches": ["competência que a candidata tem e a vaga pede"],
+  "gaps": ["requisito da vaga que a candidata NÃO tem ou tem parcialmente"],
+  "ajustes_ats": ["ajuste específico no CV para passar ATS desta vaga"],
+  "resumo": "2-3 frases diretas explicando o veredicto. Sem suavizar.",
+  "salario_mencionado": "valor ou null",
+  "skills_pedidas": ["lista de skills/requisitos extraídos da vaga"],
+  "regime": "CLT|PJ|Híbrido|Remoto|Presencial ou combinações"
+}
+
+Critérios de aderência:
+- Verde (≥70%): candidata atende os requisitos principais, pode aplicar diretamente
+- Amarelo (40-69%): atende parcialmente, precisa de ajustes ou tem gaps toleráveis
+- Vermelho (<40%): gaps críticos, aplicação tende a ser descartada no ATS
+
+Seja honesto nos gaps. Não suavize. Use conhecimento real sobre o mercado de produto no Brasil.`;
+
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': antKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
-    const d = await r.json();
-    if (d.error) throw new Error(d.error.message);
-    const raw = d.content.map(c => c.text || '').join('').replace(/```json|```/g, '').trim();
-    const res = JSON.parse(raw);
-    analiseAtual = { ...res, texto_vaga: texto, plataforma: plataforma || 'Não informado' };
-    renderAnalise(analiseAtual);
+
+    const data = await r.json();
+    const raw = data.content.map(c => c.text || '').join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    renderResult(result, plataforma, link, dataVaga, texto);
   } catch(e) {
-    document.getElementById('analise-result').innerHTML = `<div style="color:var(--danger);font-size:13px;padding:1rem 0;">Erro na análise: ${e.message}</div>`;
+    resultArea.innerHTML = `<div class="card"><span style="color:var(--red)">Erro na análise: ${e.message}</span></div>`;
   }
-  btn.disabled = false; btn.textContent = 'Analisar vaga';
 }
 
-function scoreCls(sc) {
-  return sc >= 70 ? 'score-green' : sc >= 45 ? 'score-yellow' : 'score-red';
-}
+function renderResult(r, plataforma, link, dataVaga, textoOriginal) {
+  const corAdh = r.veredicto === 'verde' ? 'var(--green)' : r.veredicto === 'amarelo' ? 'var(--yellow)' : 'var(--red)';
+  const badgeClass = r.veredicto === 'verde' ? 'badge-green' : r.veredicto === 'amarelo' ? 'badge-yellow' : 'badge-red';
+  const decisaoClass = r.decisao === 'aplicar' ? 'apply' : r.decisao === 'ajustar' ? 'adjust' : 'skip';
+  const decisaoIcon = r.decisao === 'aplicar' ? '✅' : r.decisao === 'ajustar' ? '⚡' : '❌';
+  const decisaoTexto = r.decisao === 'aplicar' ? 'Aplicar diretamente' : r.decisao === 'ajustar' ? 'Aplicar com ajustes no CV' : 'Não aplicar';
 
-function tagVeredicto(v) {
-  if (v === 'APLICAR') return 'tag-green';
-  if (v === 'APLICAR COM AJUSTE') return 'tag-yellow';
-  return 'tag-red';
-}
+  const matchTags = (r.matches || []).map(m => `<span class="tag tag-match">${m}</span>`).join('');
+  const gapTags = (r.gaps || []).map(g => `<span class="tag tag-gap">${g}</span>`).join('');
+  const atsTags = (r.ajustes_ats || []).map(a => `<li style="color:var(--text2); margin-bottom:6px; font-size:13px;">${a}</li>`).join('');
 
-function renderAnalise(r) {
-  const techs = (r.tecnologias_pedidas || []).map(t => `<span class="tag tag-blue">${t}</span>`).join('');
-  document.getElementById('analise-result').innerHTML = `
-    <div class="card">
+  document.getElementById('resultArea').innerHTML = `
+    <div class="result-block">
       <div class="result-header">
-        <div class="score-ring ${scoreCls(r.aderencia)}">${r.aderencia}%</div>
-        <div class="result-meta">
-          <div class="result-cargo">${r.cargo}</div>
-          <div class="result-empresa">${r.empresa}</div>
-          <div class="result-tags">
-            <span class="tag ${tagVeredicto(r.veredicto)}">${r.veredicto}</span>
-            <span class="tag tag-gray">${r.cv_recomendado}</span>
-            <span class="tag tag-gray">${r.senioridade}</span>
-            ${r.salario_mencionado ? `<span class="tag tag-gray">R$ ${r.salario_mencionado.toLocaleString('pt-BR')}</span>` : ''}
-          </div>
+        <div>
+          <div class="result-title">${r.empresa}</div>
+          <div class="result-sub">${r.cargo} · ${r.nivel || ''} · ${plataforma}</div>
+          ${r.regime ? `<div class="result-sub" style="margin-top:2px;">${r.regime}</div>` : ''}
+        </div>
+        <div style="text-align:right;">
+          <span class="badge ${badgeClass}" style="font-size:14px; padding:6px 14px;">${r.aderencia}%</span>
+          <div style="font-size:11px; color:var(--text3); margin-top:6px;">CV: <strong style="color:var(--text);">${r.cv_recomendado}</strong></div>
         </div>
       </div>
 
-      <div class="section-label">Veredicto</div>
-      <div class="result-text">${r.justificativa}</div>
-
-      <div class="section-label">Pontos fortes</div>
-      <div class="result-text">${r.pontos_fortes}</div>
-
-      <div class="section-label">Gaps reais</div>
-      <div class="result-text">${r.gaps}</div>
-
-      <div class="section-label">Ajustes para ATS</div>
-      <div class="result-text">${r.ajustes_ats}</div>
-
-      ${techs ? `<div class="section-label">Tecnologias pedidas</div><div class="result-tags" style="margin-top:6px">${techs}</div>` : ''}
-
-      <div class="action-bar" style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1.25rem;">
-        <button class="btn btn-primary" onclick="abrirModal()">Salvar candidatura</button>
-        <button class="btn btn-danger" onclick="descartarVaga()">Descartar vaga</button>
+      <div class="adherence-bar">
+        <div class="adherence-fill" style="width:${r.aderencia}%; background:${corAdh};"></div>
       </div>
-    </div>`;
+
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">${r.resumo}</p>
+
+      <div class="section-title">Matches</div>
+      <div class="tag-list">${matchTags || '<span style="color:var(--text3); font-size:12px;">Nenhum identificado</span>'}</div>
+
+      <div class="section-title">Gaps</div>
+      <div class="tag-list">${gapTags || '<span style="color:var(--green); font-size:12px;">Sem gaps críticos</span>'}</div>
+
+      ${atsTags ? `
+      <div class="section-title">Ajustes ATS para esta vaga</div>
+      <ul style="padding-left:18px; margin-bottom:16px;">${atsTags}</ul>
+      ` : ''}
+
+      <div class="decision-box ${decisaoClass}">
+        <span class="decision-icon">${decisaoIcon}</span>
+        <span class="decision-text">${decisaoTexto}</span>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick='salvarVaga(${JSON.stringify(r).replace(/'/g,"\\'")} , "${plataforma}", "${link}", "${dataVaga}")'>Salvar no painel</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('vagaTexto').value=''; document.getElementById('resultArea').innerHTML='<div class=\\'empty-state\\'><div class=\\'icon\\'>🎯</div><p>Cole o texto de uma vaga e clique em Analisar</p></div>'">Limpar</button>
+      </div>
+    </div>
+  `;
+
+  // Registra na memória local para Mercado
+  const stored = JSON.parse(localStorage.getItem('vagas_analisadas') || '[]');
+  stored.push({ ...r, plataforma, link, dataVaga, savedAt: new Date().toISOString() });
+  localStorage.setItem('vagas_analisadas', JSON.stringify(stored));
 }
 
-function abrirModal() {
-  if (!analiseAtual) return;
-  document.getElementById('m-empresa').value = analiseAtual.empresa === 'Não informado' ? '' : analiseAtual.empresa;
-  document.getElementById('m-cargo').value = analiseAtual.cargo || '';
-  document.getElementById('m-link').value = '';
-  document.getElementById('m-status').value = 'candidatada';
-  document.getElementById('m-motivo-wrap').style.display = 'none';
-  document.getElementById('modal-salvar').classList.add('open');
-}
-
-function fecharModal() { document.getElementById('modal-salvar').classList.remove('open'); }
-
-async function salvarCandidatura() {
-  if (!sbUrl || !sbKey) { alert('Configure o Supabase primeiro.'); return; }
-  const payload = {
-    empresa: document.getElementById('m-empresa').value || 'Não informado',
-    cargo: document.getElementById('m-cargo').value,
-    plataforma: analiseAtual?.plataforma || '',
-    link_vaga: document.getElementById('m-link').value,
-    status: document.getElementById('m-status').value,
-    salario_pretendido: parseInt(document.getElementById('m-salario').value) || null,
-    aderencia: analiseAtual?.aderencia || null,
-    cv_recomendado: analiseAtual?.cv_recomendado || null,
-    ajustes_cv: analiseAtual?.ajustes_ats || null,
-    texto_vaga: analiseAtual?.texto_vaga || null,
-    motivo_descarte: document.getElementById('m-motivo').value || null,
-    data_aplicacao: new Date().toISOString().split('T')[0]
-  };
+async function salvarVaga(r, plataforma, link, dataVaga) {
   try {
-    const r = await fetch(sbUrl + '/rest/v1/candidaturas', {
-      method: 'POST',
-      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(payload)
-    });
-    if (r.ok) { fecharModal(); alert('Candidatura salva com sucesso.'); }
-    else { alert('Erro ao salvar: ' + await r.text()); }
-  } catch(e) { alert('Falha: ' + e.message); }
-}
-
-async function descartarVaga() {
-  const motivo = prompt('Motivo do descarte (opcional):');
-  if (!sbUrl || !sbKey || !analiseAtual) { alert('Configure o Supabase e analise uma vaga primeiro.'); return; }
-  const payload = {
-    empresa: analiseAtual.empresa || 'Não informado',
-    cargo: analiseAtual.cargo || '',
-    plataforma: analiseAtual.plataforma || '',
-    status: 'descartada',
-    aderencia: analiseAtual.aderencia || null,
-    cv_recomendado: analiseAtual.cv_recomendado || null,
-    motivo_descarte: motivo || 'Descartada manualmente',
-    texto_vaga: analiseAtual.texto_vaga,
-    data_aplicacao: new Date().toISOString().split('T')[0]
-  };
-  try {
-    const r = await fetch(sbUrl + '/rest/v1/candidaturas', {
-      method: 'POST',
-      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(payload)
-    });
-    if (r.ok) { alert('Vaga descartada e registrada.'); limparVaga(); }
-  } catch(e) { alert('Falha: ' + e.message); }
-}
-
-async function carregarPainel() {
-  if (!sbUrl || !sbKey) {
-    document.getElementById('painel-table').innerHTML = '<div class="empty">Configure o Supabase na aba Configuração.</div>';
-    return;
-  }
-  document.getElementById('painel-table').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
-  try {
-    const r = await fetch(sbUrl + '/rest/v1/candidaturas?select=*&order=created_at.desc', {
-      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey }
-    });
-    todasVagas = await r.json();
-    renderMetrics(todasVagas);
-    renderTabela(filtroAtivo === 'todos' ? todasVagas : todasVagas.filter(v => v.status === filtroAtivo));
+    const payload = {
+      empresa: r.empresa,
+      cargo: r.cargo,
+      nivel: r.nivel,
+      plataforma: plataforma || 'Outro',
+      link: link || null,
+      data_vaga: dataVaga || null,
+      aderencia: r.aderencia,
+      veredicto: r.veredicto,
+      decisao: r.decisao,
+      cv_recomendado: r.cv_recomendado,
+      matches: r.matches,
+      gaps: r.gaps,
+      ajustes_ats: r.ajustes_ats,
+      resumo: r.resumo,
+      salario_mencionado: r.salario_mencionado,
+      skills_pedidas: r.skills_pedidas,
+      regime: r.regime,
+      status: 'Candidatada',
+      minha_acao: null,
+      criado_em: new Date().toISOString()
+    };
+    await sbFetch('vagas', { method: 'POST', body: JSON.stringify(payload) });
+    toast('Vaga salva no painel ✓', 'success');
   } catch(e) {
-    document.getElementById('painel-table').innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    toast(`Erro ao salvar: ${e.message}`, 'error');
   }
 }
 
-function renderMetrics(vagas) {
-  const total = vagas.length;
-  const cand = vagas.filter(v => v.status === 'candidatada').length;
-  const proc = vagas.filter(v => v.status === 'em processo').length;
-  const comAdh = vagas.filter(v => v.aderencia != null);
-  const media = comAdh.length ? Math.round(comAdh.reduce((a,b) => a + b.aderencia, 0) / comAdh.length) : null;
-  document.getElementById('metrics').innerHTML = `
-    <div class="metric"><div class="metric-val">${total}</div><div class="metric-label">Total de vagas</div></div>
-    <div class="metric"><div class="metric-val">${cand}</div><div class="metric-label">Candidatadas</div></div>
-    <div class="metric"><div class="metric-val">${proc}</div><div class="metric-label">Em processo</div></div>
-    <div class="metric"><div class="metric-val">${media != null ? media + '%' : '—'}</div><div class="metric-label">Aderência média</div></div>`;
-}
+// ============================================================
+// PAINEL DE VAGAS
+// ============================================================
+let todasVagas = [];
 
-function filtrarPainel(filtro, el) {
-  filtroAtivo = filtro;
-  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-  if (el) el.classList.add('active');
-  const filtradas = filtro === 'todos' ? todasVagas : todasVagas.filter(v => v.status === filtro);
-  renderTabela(filtradas);
-}
-
-function statusStyle(s) {
-  const map = {
-    'candidatada': 'background:var(--accent-bg);color:var(--accent-text)',
-    'em processo': 'background:var(--warning-bg);color:var(--warning)',
-    'descartada': 'background:var(--surface-alt);color:var(--text-muted)',
-    'recusada': 'background:var(--danger-bg);color:var(--danger)'
-  };
-  return map[s] || 'background:var(--surface-alt);color:var(--text-muted)';
-}
-
-function renderTabela(vagas) {
-  if (!vagas.length) {
-    document.getElementById('painel-table').innerHTML = '<div class="empty">Nenhuma vaga neste filtro.</div>';
-    return;
-  }
-  document.getElementById('painel-table').innerHTML = `
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Empresa</th><th>Cargo</th><th>Plataforma</th><th>Aderência</th><th>CV</th><th>Status</th><th>Data</th><th></th>
-        </tr></thead>
-        <tbody>${vagas.map(v => `<tr>
-          <td class="empresa">${v.empresa || '—'}</td>
-          <td>${v.cargo || '—'}</td>
-          <td>${v.plataforma || '—'}</td>
-          <td>${v.aderencia != null ? v.aderencia + '%' : '—'}</td>
-          <td>${v.cv_recomendado || '—'}</td>
-          <td><span class="tag" style="${statusStyle(v.status)};font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500">${v.status || '—'}</span></td>
-          <td>${v.data_aplicacao || '—'}</td>
-          <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;" onclick="abrirModalStatus('${v.id}', '${v.status || ''}')">Editar</button></td>
-        </tr>`).join('')}</tbody>
-      </table>
-    </div>`;
-}
-
-function abrirModalStatus(id, status) {
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-status').value = status || 'candidatada';
-  document.getElementById('edit-motivo').value = '';
-  document.getElementById('edit-notas').value = '';
-  document.getElementById('edit-motivo-wrap').style.display = 'none';
-  document.getElementById('modal-status').classList.add('open');
-}
-
-function fecharModalStatus() { document.getElementById('modal-status').classList.remove('open'); }
-
-async function atualizarStatus() {
-  const id = document.getElementById('edit-id').value;
-  const status = document.getElementById('edit-status').value;
-  const motivo = document.getElementById('edit-motivo').value;
-  const notas = document.getElementById('edit-notas').value;
-  if (!id || !sbUrl || !sbKey) { alert('Erro: ID ou configuração ausente.'); return; }
-  const payload = { status, atualizado_em: new Date().toISOString() };
-  if (motivo) payload.motivo_descarte = motivo;
-  if (notas) payload.anotacoes = notas;
+async function loadVagas() {
   try {
-    const r = await fetch(sbUrl + '/rest/v1/candidaturas?id=eq.' + id, {
-      method: 'PATCH',
-      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(payload)
-    });
-    if (r.ok) { fecharModalStatus(); carregarPainel(); }
-    else { alert('Erro: ' + await r.text()); }
-  } catch(e) { alert('Falha: ' + e.message); }
-}
-
-async function carregarMercado() {
-  if (!sbUrl || !sbKey) {
-    document.getElementById('mercado-content').innerHTML = '<div class="empty">Configure o Supabase na aba Configuração.</div>';
-    return;
-  }
-  document.getElementById('mercado-content').innerHTML = '<div class="loading"><div class="spinner"></div>Calculando padrões...</div>';
-  try {
-    const r = await fetch(sbUrl + '/rest/v1/candidaturas?select=cargo,aderencia,status,cv_recomendado,plataforma,ajustes_cv&order=created_at.desc', {
-      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey }
-    });
-    const vagas = await r.json();
-    if (!vagas.length) {
-      document.getElementById('mercado-content').innerHTML = '<div class="empty">Analise vagas primeiro para ver padrões de mercado.</div>';
-      return;
-    }
-    const total = vagas.length;
-    const comAdh = vagas.filter(v => v.aderencia != null);
-    const media = comAdh.length ? Math.round(comAdh.reduce((a,b) => a + b.aderencia, 0) / comAdh.length) : 0;
-    const aplicadas = vagas.filter(v => v.status === 'candidatada' || v.status === 'em processo').length;
-    const descartadas = vagas.filter(v => v.status === 'descartada').length;
-    const taxaAplicacao = total ? Math.round(aplicadas / total * 100) : 0;
-
-    const cvCount = {};
-    vagas.forEach(v => { if (v.cv_recomendado) cvCount[v.cv_recomendado] = (cvCount[v.cv_recomendado] || 0) + 1; });
-    const cvDominante = Object.entries(cvCount).sort((a,b) => b[1]-a[1])[0];
-
-    const platCount = {};
-    vagas.forEach(v => { if (v.plataforma) platCount[v.plataforma] = (platCount[v.plataforma] || 0) + 1; });
-    const platDominante = Object.entries(platCount).sort((a,b) => b[1]-a[1])[0];
-
-    let insight = '';
-    if (media >= 70) insight = 'O perfil está bem alinhado com as vagas analisadas. Foco em volume e velocidade de aplicação.';
-    else if (media >= 50) insight = 'Aderência moderada — revise os gaps recorrentes e ajuste o posicionamento do CV para o nível de senioridade buscado.';
-    else insight = 'Aderência baixa sugere que o target de vagas está desalinhado. Reavalie o nível de senioridade ou os setores priorizados.';
-
-    document.getElementById('mercado-content').innerHTML = `
-      <div class="metric-grid">
-        <div class="metric"><div class="metric-val">${total}</div><div class="metric-label">Vagas analisadas</div></div>
-        <div class="metric"><div class="metric-val">${media}%</div><div class="metric-label">Aderência média</div></div>
-        <div class="metric"><div class="metric-val">${taxaAplicacao}%</div><div class="metric-label">Taxa de aplicação</div></div>
-        <div class="metric"><div class="metric-val">${descartadas}</div><div class="metric-label">Descartadas</div></div>
-      </div>
-      <div class="insight-grid">
-        <div class="insight-card">
-          <div class="insight-title">CV mais solicitado</div>
-          <div class="insight-body">${cvDominante ? cvDominante[0] + ' (' + cvDominante[1] + ' vagas)' : '—'}</div>
-        </div>
-        <div class="insight-card">
-          <div class="insight-title">Plataforma dominante</div>
-          <div class="insight-body">${platDominante ? platDominante[0] + ' (' + platDominante[1] + ' vagas)' : '—'}</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Diagnóstico</div>
-        <div style="font-size:13px;color:var(--text-secondary);line-height:1.7">${insight}</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:10px">Continue alimentando vagas para gerar análises mais precisas sobre palavras-chave dominantes e gaps recorrentes.</div>
-      </div>`;
+    const data = await sbFetch('vagas?order=criado_em.desc&limit=200');
+    todasVagas = data;
+    updateConnStatus(true);
+    renderPainel();
+    updateStats();
   } catch(e) {
-    document.getElementById('mercado-content').innerHTML = `<div class="empty">Erro: ${e.message}</div>`;
+    todasVagas = [];
+    document.getElementById('vagasTableBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--red);padding:40px;">Erro: ${e.message}</td></tr>`;
   }
 }
 
-init();
+function renderPainel() {
+  const filterStatus = document.getElementById('filterStatus').value;
+  const filterAdh = document.getElementById('filterAdh').value;
+  const busca = document.getElementById('filterBusca').value.toLowerCase();
+
+  let filtradas = todasVagas.filter(v => {
+    if (filterStatus && v.status !== filterStatus) return false;
+    if (filterAdh === 'verde' && v.aderencia < 70) return false;
+    if (filterAdh === 'amarelo' && (v.aderencia < 40 || v.aderencia >= 70)) return false;
+    if (filterAdh === 'vermelho' && v.aderencia >= 40) return false;
+    if (busca && !v.empresa?.toLowerCase().includes(busca) && !v.cargo?.toLowerCase().includes(busca)) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('vagasTableBody');
+  if (!filtradas.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px;">Nenhuma vaga encontrada</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtradas.map(v => {
+    const bc = v.veredicto === 'verde' ? 'badge-green' : v.veredicto === 'amarelo' ? 'badge-yellow' : 'badge-red';
+    const sc = statusBadge(v.status);
+    const data = v.data_vaga ? new Date(v.data_vaga).toLocaleDateString('pt-BR') : '—';
+    return `<tr>
+      <td><strong>${v.empresa || '—'}</strong></td>
+      <td style="color:var(--text2);">${v.cargo || '—'}</td>
+      <td><span class="badge badge-gray">${v.plataforma || '—'}</span></td>
+      <td><span class="badge ${bc}">${v.aderencia || 0}%</span></td>
+      <td>
+        <select class="status-select" style="width:130px; padding:4px 8px;" onchange="updateStatus('${v.id}', this.value)">
+          ${['Candidatada','Em processo','Descartada','Recusada','Oferta'].map(s => `<option ${v.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td><span class="badge badge-accent">${v.cv_recomendado || '—'}</span></td>
+      <td style="color:var(--text2); font-size:12px;">${data}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="verDetalhe('${v.id}')">Ver</button>
+        <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deletarVaga('${v.id}')">×</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function statusBadge(s) {
+  const map = { 'Candidatada': 'badge-blue', 'Em processo': 'badge-green', 'Descartada': 'badge-gray', 'Recusada': 'badge-red', 'Oferta': 'badge-accent' };
+  return map[s] || 'badge-gray';
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = todasVagas.length;
+  const emProcesso = todasVagas.filter(v => v.status === 'Em processo').length;
+  document.getElementById('statEmProcesso').textContent = emProcesso;
+  const adhs = todasVagas.filter(v => v.aderencia).map(v => v.aderencia);
+  const media = adhs.length ? Math.round(adhs.reduce((a,b)=>a+b,0)/adhs.length) : 0;
+  document.getElementById('statMediaAdh').textContent = media ? `${media}%` : '—';
+}
+
+async function updateStatus(id, status) {
+  try {
+    await sbFetch(`vagas?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+    const v = todasVagas.find(v => v.id === id);
+    if (v) v.status = status;
+    toast('Status atualizado ✓', 'success');
+  } catch(e) {
+    toast(`Erro: ${e.message}`, 'error');
+  }
+}
+
+async function deletarVaga(id) {
+  if (!confirm('Remover esta vaga?')) return;
+  try {
+    await sbFetch(`vagas?id=eq.${id}`, { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+    todasVagas = todasVagas.filter(v => v.id !== id);
+    renderPainel();
+    updateStats();
+    toast('Vaga removida', 'success');
+  } catch(e) {
+    toast(`Erro: ${e.message}`, 'error');
+  }
+}
+
+function verDetalhe(id) {
+  const v = todasVagas.find(v => v.id === id);
+  if (!v) return;
+  const bc = v.veredicto === 'verde' ? 'badge-green' : v.veredicto === 'amarelo' ? 'badge-yellow' : 'badge-red';
+  const gaps = (v.gaps || []).map(g => `<span class="tag tag-gap">${g}</span>`).join('');
+  const matches = (v.matches || []).map(m => `<span class="tag tag-match">${m}</span>`).join('');
+  const ats = (v.ajustes_ats || []).map(a => `<li style="color:var(--text2);font-size:13px;margin-bottom:4px;">${a}</li>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="width:640px; max-height:85vh; overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div>
+          <div class="modal-title">${v.empresa} — ${v.cargo}</div>
+          <div style="color:var(--text2);font-size:13px;">${v.plataforma} · ${v.regime || ''}</div>
+        </div>
+        <span class="badge ${bc}" style="font-size:16px;padding:6px 14px;">${v.aderencia}%</span>
+      </div>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">${v.resumo || ''}</p>
+      ${matches ? `<div class="section-title">Matches</div><div class="tag-list" style="margin-bottom:16px;">${matches}</div>` : ''}
+      ${gaps ? `<div class="section-title">Gaps</div><div class="tag-list" style="margin-bottom:16px;">${gaps}</div>` : ''}
+      ${ats ? `<div class="section-title">Ajustes ATS</div><ul style="padding-left:18px;margin-bottom:16px;">${ats}</ul>` : ''}
+      <div style="margin-top:8px;">
+        <label>Minha ação / anotação</label>
+        <textarea id="acaoInput" rows="3" placeholder="O que você fez, resultado, aprendizado...">${v.minha_acao || ''}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-primary" onclick='saveAcao("${id}")'>Salvar anotação</button>
+        <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Fechar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function saveAcao(id) {
+  const minha_acao = document.getElementById('acaoInput').value;
+  try {
+    await sbFetch(`vagas?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ minha_acao }) });
+    const v = todasVagas.find(v => v.id === id);
+    if (v) v.minha_acao = minha_acao;
+    document.querySelector('.modal-overlay')?.remove();
+    toast('Anotação salva ✓', 'success');
+  } catch(e) {
+    toast(`Erro: ${e.message}`, 'error');
+  }
+}
+
+// ============================================================
+// MERCADO
+// ============================================================
+function loadMercado() {
+  const stored = JSON.parse(localStorage.getItem('vagas_analisadas') || '[]');
+
+  // Complementa com dados do Supabase se disponível
+  const todas = [...stored, ...todasVagas].filter((v, i, arr) =>
+    arr.findIndex(x => x.empresa === v.empresa && x.cargo === v.cargo) === i
+  );
+
+  document.getElementById('mercadoTotal').textContent = todas.length || '—';
+  const adhs = todas.filter(v => v.aderencia).map(v => v.aderencia);
+  const media = adhs.length ? Math.round(adhs.reduce((a,b)=>a+b,0)/adhs.length) : 0;
+  document.getElementById('mercadoAdh').textContent = media ? `${media}%` : '—';
+
+  if (!todas.length) return;
+
+  // Skills mais pedidas
+  const skillCount = {};
+  todas.forEach(v => (v.skills_pedidas || []).forEach(s => {
+    const sk = s.toLowerCase().trim();
+    skillCount[sk] = (skillCount[sk] || 0) + 1;
+  }));
+  const topSkills = Object.entries(skillCount).sort((a,b) => b[1]-a[1]).slice(0,12);
+  const maxSk = topSkills[0]?.[1] || 1;
+  document.getElementById('mercadoSkills').innerHTML = topSkills.length ? topSkills.map(([s,n]) => `
+    <div class="mercado-skill">
+      <span style="font-size:13px;min-width:140px;">${s}</span>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:${Math.round(n/maxSk*100)}%"></div></div>
+      <span class="skill-count">${n}</span>
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:20px 0;"><p>Sem dados</p></div>';
+
+  // Gaps recorrentes
+  const gapCount = {};
+  todas.forEach(v => (v.gaps || []).forEach(g => {
+    const gk = g.toLowerCase().trim();
+    gapCount[gk] = (gapCount[gk] || 0) + 1;
+  }));
+  const topGaps = Object.entries(gapCount).sort((a,b) => b[1]-a[1]).slice(0,8);
+  document.getElementById('mercadoGaps').innerHTML = topGaps.length ? topGaps.map(([g,n]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:13px;color:var(--text2);">${g}</span>
+      <span class="badge badge-red">${n}x</span>
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:20px 0;"><p>Sem gaps registrados</p></div>';
+
+  // Salários
+  const sals = todas.filter(v => v.salario_mencionado && v.salario_mencionado !== 'null');
+  document.getElementById('mercadoSalarios').innerHTML = sals.length ? sals.map(v => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:13px;">${v.empresa} — ${v.cargo}</span>
+      <span class="badge badge-green">${v.salario_mencionado}</span>
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:20px 0;"><p>Nenhum salário capturado</p></div>';
+
+  // Plataformas
+  const platCount = {};
+  todas.forEach(v => { const p = v.plataforma || 'Outro'; platCount[p] = (platCount[p] || 0) + 1; });
+  document.getElementById('mercadoPlataformas').innerHTML = Object.entries(platCount).map(([p,n]) => `
+    <div class="mercado-skill">
+      <span style="font-size:13px;min-width:100px;">${p}</span>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:${Math.round(n/todas.length*100)}%; background:var(--blue);"></div></div>
+      <span class="skill-count">${n}</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// GERENCIAR CVs
+// ============================================================
+let currentCV = 'produto';
+const cvKeys = { produto: 'cv_produto', sm: 'cv_sm', req: 'cv_req' };
+const cvNames = { produto: 'CV — Produto', sm: 'CV — Scrum Master', req: 'CV — Requisitos' };
+
+function switchCV(name) {
+  currentCV = name;
+  document.querySelectorAll('.cv-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['produto','sm','req'][i] === name);
+  });
+  document.getElementById('cvCardTitle').textContent = cvNames[name];
+  loadCV();
+}
+
+function loadCV() {
+  const saved = JSON.parse(localStorage.getItem(cvKeys[currentCV]) || '{}');
+  document.getElementById('cvCargos').value = saved.cargos || '';
+  document.getElementById('cvResumo').value = saved.resumo || '';
+  document.getElementById('cvKeywords').value = saved.keywords || '';
+  document.getElementById('cvDiferencial').value = saved.diferencial || '';
+
+  const hist = JSON.parse(localStorage.getItem(`hist_${currentCV}`) || '[]');
+  document.getElementById('cvHistorico').innerHTML = hist.length ? hist.slice().reverse().map(h => `
+    <div class="history-item">
+      <strong>${h.data} — motivado por: ${h.vaga}</strong>
+      ${h.nota}
+    </div>
+  `).join('') : '<div class="empty-state" style="padding:20px 0;"><p>Nenhuma alteração registrada</p></div>';
+}
+
+function saveCV() {
+  const data = {
+    cargos: document.getElementById('cvCargos').value,
+    resumo: document.getElementById('cvResumo').value,
+    keywords: document.getElementById('cvKeywords').value,
+    diferencial: document.getElementById('cvDiferencial').value,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem(cvKeys[currentCV], JSON.stringify(data));
+  toast('CV salvo ✓', 'success');
+}
+
+function exportCV() {
+  const data = JSON.parse(localStorage.getItem(cvKeys[currentCV]) || '{}');
+  const nome = cvNames[currentCV];
+  const txt = `${nome}\n${'='.repeat(nome.length)}\n\nCargos-alvo: ${data.cargos || ''}\n\nResumo:\n${data.resumo || ''}\n\nPalavras-chave ATS:\n${data.keywords || ''}\n\nDiferencial:\n${data.diferencial || ''}\n\nExportado em: ${new Date().toLocaleString('pt-BR')}`;
+  const blob = new Blob([txt], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentCV}-cv.txt`;
+  a.click();
+  toast('Exportado ✓', 'success');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  if (SB_URL && SB_KEY) {
+    document.getElementById('configModal').classList.add('hidden');
+    updateConnStatus(true);
+    loadVagas();
+  }
+  // Data padrão = hoje
+  document.getElementById('vagaData').value = new Date().toISOString().split('T')[0];
+});
 </script>
+
 </body>
 </html>
